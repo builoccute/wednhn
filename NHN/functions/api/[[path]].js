@@ -9,7 +9,7 @@ const clearSession = () => `nhn_session=; Path=/; HttpOnly; Secure; SameSite=Lax
 const randomHex = (n = 32) => Array.from(crypto.getRandomValues(new Uint8Array(n))).map(x => x.toString(16).padStart(2, '0')).join('');
 const wc = (html = '') => html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').trim().split(/\s+/).filter(Boolean).length;
 const slugify = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-async function hashPassword(password, salt = randomHex(16)) { const tagged = salt.includes('$') ? salt : `210000$${salt}`; const [iterRaw, realSalt] = tagged.split('$'); const iterations = Number(iterRaw) || 210000; const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']); const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(realSalt), iterations, hash: 'SHA-256' }, key, 256); return { salt: tagged, hash: Array.from(new Uint8Array(bits)).map(x => x.toString(16).padStart(2, '0')).join('') }; }
+async function hashPassword(password, salt = randomHex(16)) { const tagged = salt.includes('$') ? salt : `100000$${salt}`; const [iterRaw, realSalt] = tagged.split('$'); const iterations = Number(iterRaw) || 100000; const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']); const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(realSalt), iterations, hash: 'SHA-256' }, key, 256); return { salt: tagged, hash: Array.from(new Uint8Array(bits)).map(x => x.toString(16).padStart(2, '0')).join('') }; }
 async function verifyPassword(password, salt, expected) { const tagged = salt.includes('$') ? salt : `100000$${salt}`; const hp = await hashPassword(password, tagged); return hp.hash === expected; }
 const isUnsafeMethod = (m) => !['GET', 'HEAD', 'OPTIONS'].includes(m);
 function sameOriginMutation(req) { if (!isUnsafeMethod(req.method.toUpperCase()))
@@ -223,7 +223,7 @@ export const onRequest = async (ctx) => {
                 return err('Email hoặc mật khẩu không đúng.', 401);
             }
             await ctx.env.DB.prepare(`DELETE FROM auth_rate_limits WHERE id=?`).bind(rate.id).run();
-            if (!String(u.password_salt).includes('$') || Number(String(u.password_salt).split('$')[0]) < 210000) {
+            if (!String(u.password_salt).includes('$') || Number(String(u.password_salt).split('$')[0]) < 100000) {
                 const upgraded = await hashPassword(b.password || '');
                 await ctx.env.DB.prepare(`UPDATE admins SET password_hash=?,password_salt=? WHERE id=?`).bind(upgraded.hash, upgraded.salt, u.id).run();
             }
