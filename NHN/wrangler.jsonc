@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wednhn-main",
+  "compatibility_date": "2026-09-12",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wednhn",
+      "database_id": "3c039a72-650b-4a04-9aae-e504604e80c2"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "wednhn"
+    }
+  ],
+  "vars": {
+    "SITE_NAME": "Nhà Hán Ngữ",
+    "SITE_URL": "https://nhahanngu.io.vn",
+    "APP_URL": "https://app.nhahanngu.io.vn"
+  }
+}
